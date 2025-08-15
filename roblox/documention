@@ -1,0 +1,133 @@
+
+
+* **`game.Players.PlayerAdded`** es un **evento** que se activa **cada vez que un jugador entra al juego**.
+
+* Cuando ese evento se activa, Roblox **ejecuta la función que tú defines**, y **te pasa automáticamente el jugador que acaba de entrar** como un parámetro llamado `player`.
+
+* El parámetro `player` es una **referencia al jugador específico que acaba de unirse**. No es una copia, sino un acceso directo a ese jugador dentro del juego.
+
+* Esto te permite hacer cosas específicas para cada jugador, como:
+
+  * Crear carpetas o valores personalizados dentro de su objeto jugador.
+  * Acceder a su nombre con `player.Name`.
+  * Guardar o cargar sus datos.
+  * Conectarte a otros eventos relacionados con ese jugador.
+
+* Ejemplo básico:
+
+```lua
+game.Players.PlayerAdded:Connect(function(player)
+    print(player.Name .. " se ha unido al juego.")
+end)
+```
+
+---
+
+¡Claro! Aquí tienes una guía de estudio completa de MarketplaceService en Roblox, con explicaciones, funciones comunes, ejemplos y notas útiles. Puedes guardarla o imprimirla para repasarla cuando quieras.
+
+📘 Guía de Estudio – MarketplaceService (Roblox)
+📌 ¿Qué es MarketplaceService?
+Es un servicio que permite:
+
+Mostrar ventanas de compra dentro del juego.
+
+Vender Game Passes, Developer Products y assets del catálogo.
+
+Verificar si un jugador ya tiene un producto.
+
+Gestionar compras y entregar recompensas.
+
+🛠️ Funciones más usadas de MarketplaceService
+1. PromptProductPurchase(player, productId)
+🛒 Muestra una ventana emergente para comprar un Developer Product (compra repetible como monedas, vidas, etc.)
+
+✅ Ejemplo:
+lua
+Copiar
+Editar
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+
+local productId = 12345678
+
+Players.PlayerAdded:Connect(function(player)
+    wait(5)
+    MarketplaceService:PromptProductPurchase(player, productId)
+end)
+2. PromptGamePassPurchase(player, gamePassId)
+🎟️ Muestra una ventana para comprar un Game Pass (compra única).
+
+✅ Ejemplo:
+lua
+Copiar
+Editar
+local gamePassId = 98765432
+
+MarketplaceService:PromptGamePassPurchase(player, gamePassId)
+3. UserOwnsGamePassAsync(userId, gamePassId)
+🔍 Verifica si un jugador ya posee un Game Pass.
+
+✅ Ejemplo:
+lua
+Copiar
+Editar
+local success, ownsPass = pcall(function()
+    return MarketplaceService:UserOwnsGamePassAsync(player.UserId, gamePassId)
+end)
+
+if success and ownsPass then
+    print("¡El jugador ya tiene el pase!")
+end
+4. PromptPurchase(player, assetId)
+🧥 Muestra una compra de un ítem del catálogo (como una camisa o accesorio).
+
+✅ Ejemplo:
+lua
+Copiar
+Editar
+local assetId = 11223344
+MarketplaceService:PromptPurchase(player, assetId)
+5. ProcessReceipt = function(receiptInfo) ... end
+💰 Función para procesar recompensas cuando un jugador compra un Developer Product.
+
+✅ Ejemplo básico:
+lua
+Copiar
+Editar
+MarketplaceService.ProcessReceipt = function(receiptInfo)
+    local player = game.Players:GetPlayerByUserId(receiptInfo.PlayerId)
+    if not player then return Enum.ProductPurchaseDecision.NotProcessedYet end
+
+    -- Dar recompensa (ej. sumar monedas)
+    local leaderstats = player:FindFirstChild("leaderstats")
+    if leaderstats then
+        leaderstats.Coins.Value += 100
+    end
+
+    return Enum.ProductPurchaseDecision.PurchaseGranted
+end
+6. PromptSubscriptionPurchase(player, subscriptionId) (si está habilitado)
+🔁 Muestra una compra de una suscripción mensual, si tu juego las ofrece.
+
+📋 Eventos Importantes
+MarketplaceService.PromptPurchaseFinished
+🛑 Se dispara cuando una compra de catálogo se completa o se cancela.
+
+MarketplaceService.PromptGamePassPurchaseFinished
+🧾 Se dispara después de intentar comprar un Game Pass.
+
+🧠 Consejos de uso
+✅ Usa pcall() al hacer llamadas que podrían fallar (como UserOwnsGamePassAsync) para evitar errores.
+
+✅ Asegúrate de tener activado API Services en Game Settings > Security para que ProcessReceipt funcione.
+
+✅ Usa leaderstats o valores similares para entregar recompensas (monedas, XP, etc.).
+
+🧪 ¿Cómo probar compras?
+Usa Developer Console (F9) para ver errores.
+
+Puedes probar Developer Products y Game Passes en modo Play dentro de Roblox Studio (aunque algunos requieren publicar el juego).
+
+
+
+

@@ -1,0 +1,16 @@
+(Variable)++ : incrementar el numero que tiene esa variable de uno en uno,
+
+Como devolver un resultado de una funcion a otra,
+ej: 
+    public static float PrecioTotal(float precioUnidad, int unidades) {
+    float total = precioUnidad * unidades;
+    return total; // <<< aquí devuelves el resultado (un float)
+    }
+
+    public static void main(String[] args) {
+
+
+    float resultado = PrecioTotal(4,5f, 2); (aqui dices que la variable float llamada resultado es igual a precion total)
+    System.out.println("El precio total es: " + resultado);
+}
+

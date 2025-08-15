@@ -1,0 +1,1032 @@
+--Rescripted by Urmom
+--Revamped Periastrons: The Periastron of Rainbow Maelstrom
+--The leader of the bunch, you know it well (get the reference?)
+
+function Create(ty)
+	return function(data)
+		local obj = Instance.new(ty)
+		for k, v in pairs(data) do
+			if type(k) == 'number' then
+				v.Parent = obj
+			else
+				obj[k] = v
+			end
+		end
+		return obj
+	end
+end
+
+local Seed = Random.new(tick())
+
+local Tool = script.Parent
+Tool.Enabled = true
+
+local Handle = Tool:WaitForChild("Handle",10)
+
+local Region = require(script:WaitForChild("RegionModule",10))
+
+local PointLight = Handle:WaitForChild("PointLight",10)
+
+local Sparkles = Handle:FindFirstChildOfClass("Sparkles")
+
+local Animations = Tool:WaitForChild("Animations",10)
+
+local Deletables = {} --Send all deletables here
+
+local Sounds = {
+	LungeSound = Handle:WaitForChild("LungeSound",10),
+	SlashSound = Handle:WaitForChild("SlashSound",10),
+}
+
+local PeriastronNames = {
+	"Azure",
+	"Grimgold",
+	"Crimson",
+	"Chartreuse",
+	"Amethyst",
+	"Ivory",
+	"Noir",
+	
+}
+
+local PeriastronNamesAlt = {
+	"Azure",
+	"Grimgold",
+	"Crimson",
+	"Chartreuse",
+	"Amethyst",
+	"Ivory",
+	"Noir",
+	"Hazel",
+	"Fuchsia",
+	"Rainbow"
+}
+
+local AttackAnims
+
+local Services = {
+	Players = (game:FindService("Players") or game:GetService("Players")),
+	TweenService = (game:FindService("TweenService") or game:GetService("TweenService")),
+	RunService = (game:FindService("RunService") or game:GetService("RunService")),
+	Debris = (game:FindService("Debris") or game:GetService("Debris")),
+	ServerScriptService = (game:FindService("ServerScriptService") or game:GetService("ServerScriptService"))
+}
+
+local Components = {
+	PeriSparkle = Handle:WaitForChild("Sparkles",10),
+	PeriTrail = Handle:WaitForChild("Trail",10),
+	RainbowFlames = Handle:WaitForChild("Flames",10),
+	RainbowStarTrail = Handle:WaitForChild("RainbowStarTrail",10),
+	StarFlames = Handle.RainbowStarBottom:WaitForChild("StarFlames",10),
+	SuperNova = Handle.RainbowStarBottom:WaitForChild("SuperNova",10),
+	MouseInput = Tool:WaitForChild("MouseInput",10)
+}
+Components.PeriSparkle.Enabled = true
+Components.PeriTrail.Enabled = false
+PointLight.Enabled = true
+
+
+local Player,Character,Humanoid,Root,Torso
+
+local Properties = {
+	BaseDamage = 400,
+	SpecialCooldown = 0,
+	GrimgoldRange = 40,
+}
+
+local Remote = (Tool:FindFirstChild("Remote") or Instance.new("RemoteEvent"));Remote.Name = "Remote";Remote.Parent = Tool
+
+
+
+local Grips = {
+	Normal = Tool:WaitForChild("NormalGrip").Value,
+	--BackR6 = Tool:WaitForChild("BackGrip").Value,
+	--BackR15 = Tool:WaitForChild("BackGrip").Value+Vector3.new(-.7,0,-.7)
+}
+Tool.Grip = Grips.Normal
+
+local function Wait(para) -- bypasses the latency
+	local Initial = tick()
+	repeat
+		Services.RunService.Heartbeat:Wait()
+	until tick()-Initial >= para
+end
+
+function RayCast(Pos, Dir, Max, IgnoreList)
+	return game:GetService("Workspace"):FindPartOnRayWithIgnoreList(Ray.new(Pos, Dir.unit * (Max or 999.999)), IgnoreList) 
+end
+
+function IsInTable(Table,Value)
+	for _,v in pairs(Table) do
+		if v == Value then
+			return true
+		end
+	end
+	return false
+end
+
+local function HasPeri(PeriName)
+	return (Player:FindFirstChild("Backpack") and Player:FindFirstChild("Backpack"):FindFirstChild(PeriName.."Periastron")) or false
+end
+
+local function HasFullSet()
+	for _,names in pairs(PeriastronNames) do
+		if not HasPeri(names) then
+			return false
+		end
+	end
+	return true
+end
+
+function IsTeamMate(Player1, Player2)
+	return (Player1 and Player2 and not Player1.Neutral and not Player2.Neutral and Player1.TeamColor == Player2.TeamColor)
+end
+
+function TagHumanoid(humanoid, player)
+	local Creator_Tag = Instance.new("ObjectValue")
+	Creator_Tag.Name = "creator"
+	Creator_Tag.Value = player
+	Services.Debris:AddItem(Creator_Tag, 2)
+	Creator_Tag.Parent = humanoid
+end
+
+local function VisualizeRay(ray,RayLength)
+	local RayCast = Create("Part"){
+		Material = Enum.Material.Neon,
+		Color = Color3.new(0,1,0),
+		Size = Vector3.new(0.3,0.3,(RayLength or 5)),
+		CFrame = CFrame.new(ray.Origin, ray.Origin+ray.Direction) * CFrame.new(0, 0, -(RayLength or 5) / 2),
+		Anchored = true,
+		CanCollide = false,
+		Parent = workspace
+	}
+	game:GetService("Debris"):AddItem(RayCast,5)
+end
+
+function UntagHumanoid(humanoid)
+	for i, v in pairs(humanoid:GetChildren()) do
+		if v:IsA("ObjectValue") and v.Name == "creator" then
+			v:Destroy()
+		end
+	end
+end
+
+local function EnableParticles(Verdict) --Sword of light
+	for _,stuff in pairs(Handle:GetDescendants()) do
+		if (stuff:IsA("ParticleEmitter") and stuff.Parent ~= Handle) or stuff:IsA("Light") then
+			stuff.Enabled = Verdict
+		end
+		if stuff:IsA("Light") then
+			stuff.Range = (Verdict and 10) or 3
+		end
+	end
+end
+
+local function SpecialParticles(Verdict)
+	for _,stuff in pairs(Handle:GetDescendants()) do
+		if stuff:IsA("ParticleEmitter") and stuff.Parent == Handle then
+			stuff.Enabled = Verdict
+		end
+		if stuff:IsA("Beam") then
+			stuff.TextureSpeed = (Verdict and 1) or .1
+			stuff.Color = (Verdict and ColorSequence.new(Color3.new(1,1,1)) or ColorSequence.new(Color3.new(.5,.5,.5)))
+		end
+	end
+end
+
+function RainbowDefence()
+	if not Humanoid or Humanoid.Health <= 0 or not Character then return end
+
+	if not (Character) then  
+
+		EnableParticles(false)
+		Properties.SpecialActive = false
+		return 
+	end
+
+	if not Character:FindFirstChild(script:WaitForChild("RainbowDefense").Name) and Tool:IsDescendantOf(Character) then
+		local DefenseScript = script:WaitForChild("RainbowDefense"):Clone()
+		local ToolRef = Create("ObjectValue"){
+			Name = "ToolRef",
+			Value = Tool,
+			Parent = DefenseScript
+		}
+		DefenseScript.Parent = Character
+		DefenseScript.Disabled = false
+	end
+
+	if Properties.SpecialActive then --[[print("On Cooldown")]] return end
+	--SwordMesh.VertexColor = Vector3.new(1,1,1) * 10 -- Make the sword look all bright
+
+	Properties.SpecialActive = true
+	EnableParticles(true)
+
+end --Sword of light
+
+function GetHumanoidsInRange(Range)
+	local RecordedHumanoids = {}
+	for _,parts in pairs(Region.new(Root.CFrame,Vector3.new(1,1,1)*Range):Cast(Character)) do
+		if parts and parts.Parent and string.find(string.lower(parts.Name),"torso") or string.find(string.lower(parts.Name),"root") and (parts.CFrame.p-Root.CFrame.p).magnitude <= Range then
+			local Hum = parts.Parent:FindFirstChildOfClass("Humanoid")
+			if Hum and Hum.Health ~= 0 and not IsInTable(RecordedHumanoids,Hum) then
+				RecordedHumanoids[#RecordedHumanoids+1] = Hum
+			end
+		end
+	end
+	return RecordedHumanoids
+end
+
+local function GetNearestTorso(MarkedPosition,TorsoPopulationTable)
+	local ClosestDistance = math.huge
+	local ClosestTorso
+	for i=1,#TorsoPopulationTable do
+		local distance = (TorsoPopulationTable[i].CFrame.p-MarkedPosition).magnitude
+		if TorsoPopulationTable[i] and  distance < ClosestDistance then
+			ClosestDistance = distance
+			ClosestTorso = TorsoPopulationTable[i]
+		end
+	end
+	--warn("The Closest Person is: "..ClosestTorso.Parent.Name)
+	return ClosestTorso
+end
+
+
+local RainbowPillar = Create("Part"){
+	Shape = Enum.PartType.Cylinder,
+	Material = Enum.Material.Neon,
+	Name = "RainbowPillar",
+	BrickColor = BrickColor.new("Really red"),
+	Size = Vector3.new(500,10,10),
+	CanCollide = false,
+	Anchored = true,
+	Transparency = 0.15,
+	Locked = true,
+	TopSurface = Enum.SurfaceType.Smooth,
+	BottomSurface = Enum.SurfaceType.Smooth
+}
+
+
+
+local Surfaces = {"Front","Back","Left","Right","Top","Bottom"}
+
+local PillarLighting = Create("SurfaceLight"){
+	Color = Color3.fromRGB(170, 255, 255),
+	Angle = 180,
+	Enabled = true,
+	Range = 20,
+	Shadows = false
+}
+
+local rainbo = script.RainbowBeams:WaitForChild("RainbowBeam",5):Clone()
+rainbo.Parent = PillarLighting
+rainbo.Disabled = false
+
+for _,surfaces in pairs(Surfaces) do
+	local Lighting = PillarLighting:Clone()
+	Lighting.Face = Enum.NormalId[surfaces]
+	Lighting.Parent = RainbowPillar
+end
+
+
+
+		local LightBeamPillar = Create("Part"){
+	Shape = Enum.PartType.Cylinder,
+	Material = Enum.Material.Neon,
+	Name = "MoltenRainbow",
+	BrickColor = BrickColor.new("random"),
+	Size = Vector3.new(500,10,10),
+	CanCollide = false,
+	Anchored = false,
+	Transparency = 0.25,
+	Locked = true,
+	TopSurface = Enum.SurfaceType.Smooth,
+	BottomSurface = Enum.SurfaceType.Smooth
+}
+
+
+
+
+
+local CurrentTime,LastTime = tick(),tick()
+function Activated()
+	if not Tool.Enabled then return end
+	Tool.Enabled = false
+	CurrentTime = tick()
+	if (CurrentTime-LastTime) <= 0.2 then
+		--print("Lunge")
+		Sounds.LungeSound:Play()
+		Components.PeriTrail.Enabled = true
+		local MousePosition = Components.MouseInput:InvokeClient(Player)
+		local Direction = CFrame.new(Root.Position, Vector3.new(MousePosition.X, Root.Position.Y, MousePosition.Z))
+		local BodyVelocity = Instance.new("BodyVelocity")
+		BodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
+		BodyVelocity.Velocity = Direction.lookVector * ((HasPeri("Fuchsia") and 275) or 175)
+		Services.Debris:AddItem(BodyVelocity, 0.5)
+		BodyVelocity.Parent = Root
+		delay(.9,function()
+			Components.PeriTrail.Enabled = false
+		end)
+		Root.CFrame = CFrame.new(Root.CFrame.p,Root.CFrame.p+Direction.lookVector)
+		wait(1)
+	else
+		local SwingAnims = {AttackAnims.Slash,AttackAnims.SlashAnim,AttackAnims.RightSlash}
+		local AttackAnim = SwingAnims[Seed:NextInteger(1,#SwingAnims)]
+		spawn(function()
+			if AttackAnim ~= AttackAnims.SlashAnim then
+				Sounds.SlashSound:Play()
+				else
+				Sounds.SlashSound:Play()
+				wait(.5)
+				Sounds.SlashSound:Play()
+			end	
+		end)
+
+		AttackAnim:Play()
+	--wait(.4)
+	end
+	LastTime = CurrentTime
+	Tool.Enabled = true
+end
+
+local Touch
+local EquippedPassives = {}
+
+local IvoryDebounce,GrimgoldDebounce,CrimsonDebounce = false,false,false
+
+
+function Equipped(Mouse)
+	Character = Tool.Parent
+	Root = Character:FindFirstChild("HumanoidRootPart")
+	Player = Services.Players:GetPlayerFromCharacter(Character)
+	Humanoid = Character:FindFirstChildOfClass("Humanoid")
+	Humanoid.JumpPower = 90
+	Humanoid.WalkSpeed = 56
+	AttackAnims = {
+		Slash = Animations:WaitForChild(Humanoid.RigType.Name,10):WaitForChild("Slash",10),
+		RightSlash = Animations:WaitForChild(Humanoid.RigType.Name,10):WaitForChild("RightSlash",10),
+		SlashAnim = Animations:WaitForChild(Humanoid.RigType.Name,10):WaitForChild("SlashAnim",10),
+	}
+	for i,v in pairs(AttackAnims) do
+		AttackAnims[i] = Humanoid:LoadAnimation(v)
+	end
+	Touch = Handle.Touched:Connect(function(hit)
+		Damage(hit,Properties.BaseDamage,false)
+	end)
+	
+	
+	local IgnoreHealthChange = false
+		local CurrentHealth = Humanoid.Health
+		EquippedPassives[#EquippedPassives+1] = Humanoid.Changed:Connect(function(Property) -- Based on Azure Periastron
+			local NewHealth = Humanoid.Health
+			if not IgnoreHealthChange and NewHealth ~= Humanoid.MaxHealth then
+				if NewHealth < CurrentHealth then
+					local DamageDealt = (CurrentHealth - NewHealth)
+					IgnoreHealthChange = true
+					Humanoid.Health =  
+					--print((HasPeri("Azure") and "Has Azure") or "Does not have Azure")
+					IgnoreHealthChange = false
+				end
+			end
+			
+			CurrentHealth = NewHealth
+		end)
+	
+	
+	
+		
+	if HasPeri("Grimgold") then
+		EquippedPassives[#EquippedPassives+1] = Services.RunService.Heartbeat:Connect(function()
+			if GrimgoldDebounce or not Tool:IsDescendantOf(Character) then return end
+			repeat
+				
+				GrimgoldDebounce = true
+				local TaggedHumanoids = {}
+					for _,Hum in pairs(GetHumanoidsInRange((HasFullSet() and Properties.GrimgoldRange*1.5) or Properties.GrimgoldRange)) do
+						if not IsInTable(TaggedHumanoids,Hum) and not IsTeamMate(Player,Services.Players:GetPlayerFromCharacter(Hum.Parent)) and not Hum.Parent:FindFirstChild("RevealRainbow")then
+							TaggedHumanoids[#TaggedHumanoids+1] = Hum
+							spawn(function()
+								local RevealScript = script:WaitForChild("RevealRainbow",10):Clone()
+								RevealScript:WaitForChild("Range").Value = (HasFullSet() and Properties.GrimgoldRange*1.5) or Properties.GrimgoldRange
+								RevealScript:WaitForChild("Creator").Value = Character
+								RevealScript:WaitForChild("Tool").Value = Tool
+								RevealScript.Parent = Hum.Parent
+								RevealScript.Disabled = false
+							end)
+							Hum.WalkSpeed = (HasFullSet() and 4) or 12
+						end
+					end
+				wait(1/10)
+				GrimgoldDebounce = false
+				--Services.RunService.Heartbeat:Wait()
+			until not Tool:IsDescendantOf(Character) or Humanoid.Health <= 0
+		end)
+	end
+	
+	if HasPeri("Crimson") then
+		EquippedPassives[#EquippedPassives+1] = Services.RunService.Heartbeat:Connect(function()
+			if CrimsonDebounce or not Tool:IsDescendantOf(Character) then return end
+			repeat
+				CrimsonDebounce = true
+				Wait((HasFullSet() and Seed:NextNumber(.1,.3)) or Seed:NextNumber(.5,1))
+				local NearbyPlayers = {}
+				for _,player in pairs(Services.Players:GetPlayers()) do
+					if player ~= Player and player.Character and player.Character.PrimaryPart then
+						local Hum = player.Character:FindFirstChildOfClass("Humanoid")
+						if Hum and Hum.Health <= 0 and Hum.Health ~= 0 and (player.Character.PrimaryPart.CFrame.p-Root.CFrame.p).Magnitude <=30 then
+							NearbyPlayers[#NearbyPlayers+1] = player.Character.PrimaryPart
+						end
+					end
+				end
+				if #NearbyPlayers == 0 then
+					local SpawnPos = (Root.CFrame*CFrame.new(Seed:NextInteger(-100,100),100,Seed:NextInteger(-100,100))).p
+					local hit,pos = RayCast(SpawnPos,(SpawnPos-Vector3.new(0,1,0))-SpawnPos,150,{Character})
+					if hit then
+						local PillarClone = RainbowPillar:Clone()
+						local PillarScript = script:WaitForChild("RainbowBeams",5):Clone()
+						PillarScript:WaitForChild("Creator",5).Value = Player
+						PillarScript.Parent = PillarClone
+						PillarClone.CFrame = CFrame.new(pos+Vector3.new(0,PillarClone.Size.X/2,0))*CFrame.Angles(0,0,math.rad(90))
+						PillarClone.Parent = workspace
+						PillarScript.Disabled = false
+					end
+				else
+					local ChosenPlayer = NearbyPlayers[Seed:NextInteger(1,#NearbyPlayers)]
+					if ChosenPlayer then
+						local PillarClone = RainbowPillar:Clone()
+						local PillarScript = script:WaitForChild("CrimsonPillar",5):Clone()
+						PillarScript:WaitForChild("Creator",5).Value = Player
+						PillarScript.Parent = PillarClone
+						PillarClone.CFrame = CFrame.new(ChosenPlayer.CFrame.p+Vector3.new(0,(PillarClone.Size.X/2)-2.5,0))*CFrame.Angles(0,0,math.rad(90))
+						PillarClone.Parent = workspace
+						PillarScript.Disabled = false
+					end
+				end
+				
+				Services.RunService.Heartbeat:Wait()
+				CrimsonDebounce = false
+			until not Tool:IsDescendantOf(Character) or Humanoid.Health <= 0
+		end)
+	end
+	
+	if HasPeri("Ivory") then
+		
+		local ShardContent = script:WaitForChild("ShardContent",10):GetChildren()	
+		
+		local Shard = Create("Part"){
+						Material = Enum.Material.Neon,
+			Color = Color3.fromRGB(150, 255, 125),
+			Size = Vector3.new(1,1,1)*3,
+						Anchored = false,
+						CanCollide = false,
+						Name = "StarShard",
+						Locked = true,
+						Transparency = 0,
+						Shape = Enum.PartType.Ball,
+						CFrame = Handle.CFrame,
+					}
+					local TopAttachment = Create("Attachment"){
+						Position = Vector3.new(0,Shard.Size.y/2,0),
+						Name = "TopAttachment",
+						Parent = Shard
+					}
+					local BottomAttachment = Create("Attachment"){
+						Position = Vector3.new(0,-Shard.Size.y/2,0),
+						Name = "BottomAttachment",
+						Parent = Shard
+					}
+					for _,stuff in pairs(ShardContent) do
+						if stuff:IsA("ParticleEmitter") then
+							local particle = stuff:Clone()
+							particle.Parent = Shard
+						elseif stuff:IsA("Trail") then
+							local trail = stuff:Clone()
+							trail.Attachment0 = TopAttachment;
+							trail.Attachment1 = BottomAttachment;
+							trail.Parent = Shard
+							trail.Enabled = true
+						end
+					end
+		EquippedPassives[#EquippedPassives+1] = Services.RunService.Heartbeat:Connect(function()
+	
+				if IvoryDebounce or not Tool:IsDescendantOf(Character) then return end
+				
+				
+				repeat
+					--wait(Seed:NextNumber(.1,.5))
+					IvoryDebounce = true
+					local Proj = Shard:Clone()
+					for _,v in pairs(Proj:GetChildren()) do
+						if v:IsA("ParticleEmitter") then
+							v.Enabled = true
+						end
+					end
+					local SparkleClone = script:WaitForChild("Sparkle",5):Clone()
+				SparkleClone.Parent = Proj
+				
+					SparkleClone:Play()
+					local ShardScript = script:WaitForChild("StarShard",10):Clone()
+					ShardScript:WaitForChild("Creator").Value = Player
+					ShardScript.Parent = Proj
+					ShardScript.Disabled = false
+					--Services.Debris:AddItem(Proj,7)
+					Proj.CFrame = Handle.CFrame
+					Proj.Parent = workspace
+					Proj:SetNetworkOwner(nil)
+					Proj.Velocity = CFrame.new(Handle.CFrame.p,Handle.CFrame.p+Vector3.new(Seed:NextNumber(-1,1),Seed:NextNumber(0,1),Seed:NextNumber(-1,1))).lookVector*Seed:NextNumber(50,150)
+					Wait((HasFullSet() and .2) or .5)
+					IvoryDebounce = false
+					--Services.RunService.Heartbeat:Wait()
+				until not Tool:IsDescendantOf(Character) or Humanoid.Health <= 0
+		end)
+	end
+	
+	if HasPeri("Rainbow") then
+		Components.RainbowFlames.Enabled = true
+	end
+	
+	if HasFullSet() then 
+		script:WaitForChild("LegendaryAirRide",10).Disabled = false
+	end
+	--^ music for sword
+
+end
+
+
+
+
+function Unequipped()
+	if Touch then Touch:Disconnect();Touch = nil end
+	for i,v in pairs(AttackAnims) do
+		v:Stop()
+	end
+	for index,passive in pairs(EquippedPassives) do
+		if passive then 
+			passive:Disconnect();EquippedPassives[index] = nil
+		end 
+	end
+	Humanoid.JumpPower = 70
+	Humanoid.WalkSpeed = 24
+	
+
+end
+
+
+
+local HitHumanoids = {}
+function Damage(hit,TotalDamage)
+	if not hit or not hit.Parent then return end
+	local Hum = hit.Parent:FindFirstChildOfClass("Humanoid")
+	local ForceField = hit.Parent:FindFirstChildOfClass("ForceField")
+	if not Hum or Hum.Health <=0 or Hum == Humanoid or ForceField then return end
+	
+	if IsTeamMate(Player,Services.Players:GetPlayerFromCharacter(Hum.Parent)) then return end
+	
+	if IsInTable(HitHumanoids,Hum) then return end
+	
+	spawn(function()
+		UntagHumanoid(Hum)
+		TagHumanoid(Hum,Player)
+		HitHumanoids[#HitHumanoids+1]=Hum
+		Hum:TakeDamage(TotalDamage)
+		Humanoid.Health = math.clamp(Humanoid.Health + (TotalDamage * ((HasFullSet() and .3) or .2)),0,Humanoid)--Noir life-steal
+		--wait(.5)
+		for i,v in pairs(HitHumanoids) do
+			if v == Hum then
+				HitHumanoids[i] = nil
+			end
+		end
+	end)
+end
+
+Tool.Activated:Connect(Activated)
+Tool.Equipped:Connect(Equipped)
+Tool.Unequipped:Connect(Unequipped)
+
+
+function SummonRainBeam()
+	if not Sparkles.Enabled then return end
+	Sparkles.Enabled = false
+	local RainBeamScript = script:WaitForChild("RainBeam",5):Clone()
+	RainBeamScript:WaitForChild("Creator",5).Value = Player
+	RainBeamScript:WaitForChild("Tool",5).Value = Tool
+	RainBeamScript.Parent = Services.ServerScriptService
+	local PeriFormation = RainBeamScript:WaitForChild("PeriFormation",5)
+	for _,name in pairs(PeriastronNamesAlt) do
+		local Peri = HasPeri(name)
+		if Peri then
+			local PeriHandle = Peri:FindFirstChild("Handle",true)
+			
+			if PeriHandle then
+				local PeriLight = PeriHandle:FindFirstChildOfClass("PointLight")
+				local PeriMesh = PeriHandle:FindFirstChildOfClass("SpecialMesh")
+				if PeriMesh and PeriLight then
+					local PeriTag = Create("Color3Value"){
+						Name = PeriMesh.TextureId,
+						Value = PeriLight.Color,
+						Parent = PeriFormation
+					}
+				end
+			end
+		
+		end
+	end
+	RainBeamScript.Disabled = false
+	
+	repeat
+		Services.RunService.Heartbeat:Wait()
+	until not RainBeamScript or not RainBeamScript:IsDescendantOf(Services.ServerScriptService)
+	
+	wait((HasFullSet() and Properties.SpecialCooldown/2) or Properties.SpecialCooldown)
+	Sparkles.Enabled = true
+end
+
+local ChartreuseReady,AmethystReady,HazelReady --[[,RainbowNovaReady,RainbowCometReady,RainbowMeteorReady,RainbowStarReady,MoltenRainbowReady]] = true,true,true --[[,true,true,true,true,true]] -- debounces for each one
+
+function ShieldPulse()
+	if not ChartreuseReady then return end
+	ChartreuseReady = false
+	--print("Shield Pulse")
+	local ShieldScript = script:WaitForChild("ShieldScript",5):Clone()
+	ShieldScript.Parent = Character
+	ShieldScript.Disabled = false
+	
+	repeat
+		Services.RunService.Heartbeat:Wait()
+	until not ShieldScript or not ShieldScript.Parent
+	
+	delay((HasFullSet() and 3) or 7*2,function()
+		ChartreuseReady = true
+	end)
+end
+
+function Singularity()
+	if not AmethystReady then return end
+	AmethystReady = false
+	--print("Singularity")
+	
+local Centre = Create("Part"){
+	Size = Vector3.new(1,1,1)*1,
+	CFrame = Root.CFrame,
+	Transparency = 1,
+	Anchored = true,
+	Locked = true,
+	CanCollide = false,
+	TopSurface = Enum.SurfaceType.Smooth,
+	BottomSurface = Enum.SurfaceType.Smooth	
+}
+
+Centre.Parent = workspace
+local BlackHoleScript = script:WaitForChild("BlackHole"):Clone()
+BlackHoleScript:WaitForChild("Creator",5).Value = Player
+BlackHoleScript.Parent = Centre
+BlackHoleScript.Disabled = false
+
+	delay((HasFullSet() and .5) or 1,function()
+		AmethystReady = true
+	end)
+end
+
+function RockLift()
+	if not HazelReady then return end
+	HazelReady = true
+	--print("Rock Lift")
+	local hit,pos,mat = RayCast(Root.CFrame.p,(Root.CFrame.p+Vector3.new(0,-1,0))-Root.CFrame.p,10,{Character})
+	
+	local Rock = Create("Part"){
+		Size = Vector3.new(1,1,1)*15,
+		Material = Enum.Material.Neon,
+		Anchored = true,
+		Name = "Rock",
+		Locked = true,
+		CanCollide = true,
+		Color = ((hit and hit.Color) or Color3.fromRGB(102, 51, 0)),
+		CFrame = CFrame.new(Root.CFrame.p-Vector3.new(0,2,0))*CFrame.Angles(math.rad(Seed:NextInteger(0,360)),math.rad(Seed:NextInteger(0,360)),math.rad(Seed:NextInteger(0,360))),
+		Parent = workspace
+	}
+	
+	local RockSummon = script:WaitForChild("RockSummon",5):Clone()
+	RockSummon:WaitForChild("Creator",5).Value = Player
+	RockSummon.Parent = Rock
+	RockSummon.Disabled = false
+	
+	local JumpForce = Create("BodyVelocity"){
+		MaxForce = Vector3.new(1,1,1) * math.huge,
+		Name = "JumpForce",
+		Velocity = ((Root.CFrame.p + Vector3.new(0,1,0))-Root.CFrame.p).Unit*150,
+		Parent = Root
+	}
+	Services.Debris:AddItem(JumpForce,.1)
+	
+	delay((HasFullSet() and 1) or 1*2,function()
+		HazelReady = true
+	end)
+end
+
+function RainbowNova() 
+	--if not RainbowNovaReady then return end
+	--RainbowNovaReady = false
+	local StarSummon = script:WaitForChild("RainbowNova",10):Clone()
+	local Star = Create("Part"){
+		Material = Enum.Material.Neon,
+		Size = Vector3.new(1,1,1)*1,
+		Anchored = true,
+		CanCollide = false,
+		Locked = true,
+		Transparency = 1,
+		Shape = Enum.PartType.Ball,
+		CFrame = CFrame.new(Handle.CFrame.p),
+		BrickColor = BrickColor.Random(),
+		Parent = workspace
+	}
+	local Attach = Create("Attachment"){
+		Position = Vector3.new(0,0,0),
+		Parent = Star
+	}
+
+	--Services.Debris:AddItem(Star,60)
+	StarSummon:WaitForChild("Creator",10).Value = Player
+	StarSummon.Parent = Star
+	StarSummon.Disabled = false
+
+	--RainbowNovaReady = true
+end
+
+function Rainboom() 
+	--if not RainbowNovaReady then return end
+	--RainbowNovaReady = false
+	local Center = (Character:FindFirstChild("HumanoidRootPart"))
+	local RainBoom = script:WaitForChild("RainBoom",10):Clone()
+	local Star = Create("Part"){
+		Material = Enum.Material.Neon,
+		Size = Vector3.new(1,1,1)*1,
+		Anchored = true,
+		CanCollide = false,
+		Locked = true,
+		Transparency = 1,
+		Shape = Enum.PartType.Ball,
+		--CFrame = CFrame.new(Handle.CFrame.p),
+		CFrame = Center.CFrame,
+		BrickColor = BrickColor.Random(),
+		Parent = workspace
+	}
+	local Attach = Create("Attachment"){
+		Position = Vector3.new(0,0,0),
+		Parent = Star
+	}
+
+	--Services.Debris:AddItem(Star,60)
+	RainBoom:WaitForChild("Creator",10).Value = Player
+	RainBoom.Parent = Star
+	RainBoom.Disabled = false
+
+	--RainbowNovaReady = true
+end
+
+function RainbowComet() 
+	--if not RainbowCometReady then return end
+	--RainbowCometReady = false
+	if Services.ServerScriptService:FindFirstChild("AmethystComet") then return end
+
+	--Services.Debris:AddItem(Tag,60)
+
+
+
+	local CometScript = script:WaitForChild("CometScript",10):Clone()
+	local Creator = Create("ObjectValue"){
+		Name = "Creator",
+		Value = Player,
+		Parent = CometScript
+	}
+
+	local Comet = Create("Part"){
+		Size = Vector3.new(1,1,1)*150,
+		Material = Enum.Material.Neon,
+		Shape = Enum.PartType.Ball,
+		Name = "Comet",
+		Anchored = false,
+		CanCollide = false,
+		Locked = true,
+		Transparency = 1,
+		CFrame = CFrame.new((Root.CFrame * CFrame.new(600,0,0) + Vector3.new(0,250,0)).p,(Root.CFrame*CFrame.new(-2000,0,0)).p),
+		Parent = workspace
+	}
+	Comet:SetNetworkOwner(nil)
+	CometScript.Parent = Comet
+	CometScript.Disabled = false
+	
+	local touch
+	touch = Comet.Touched:Connect(function(hit)
+		if hit and hit.Parent and hit:IsA("BasePart") and not hit.Anchored and not hit:FindFirstAncestorWhichIsA("Accessory") and not hit:FindFirstAncestorWhichIsA("Tool") and not hit.Parent:FindFirstChildOfClass("Humanoid") and hit.Parent ~= RainbowBeams and not hit:FindFirstChild("VaporizePart") then
+			if (hit.Size.X*hit.Size.Y*hit.Size.Z) then
+				local VaporizePart = script.CometScript.VaporizePart2:Clone()
+				VaporizePart.Parent = hit
+				VaporizePart.Disabled = false
+			end
+		end
+	end)
+	
+	repeat
+		Services.RunService.Heartbeat:Wait()
+		--print(CometScript,CometScript.Parent)
+	until not CometScript or not CometScript.Parent or not CometScript:IsDescendantOf(workspace)
+
+
+	wait(1)
+
+	--RainbowCometReady = true
+end
+
+function RainbowMeteorShower()
+	--if not RainbowMeteorReady then return end
+	--RainbowMeteorReady = false
+	local Done = false
+	spawn(function()
+		wait(15)
+		Done = true
+	end)
+	spawn(function()
+		repeat
+			local MeteorScript = script:WaitForChild("MeteorScript",10):Clone()
+			local Creator = Create("ObjectValue"){
+				Name = "Creator",
+				Value = Player,
+				Parent = MeteorScript
+			}
+
+			local Meteor = Create("Part"){
+				Size = Vector3.new(1,1,1)*Seed:NextInteger(5,20),
+				Material = Enum.Material.Neon,
+				Shape = Enum.PartType.Ball,
+				Name = "Meteor",
+				Anchored = false,
+				CanCollide = false,
+				Locked = true,
+				Transparency = 1,
+				CFrame = CFrame.new((Root.CFrame*CFrame.new(Seed:NextNumber(-300,300),Seed:NextNumber(300,400),Seed:NextNumber(-300,300))).p,(Root.CFrame*CFrame.new(Seed:NextNumber(-300,300),Root.CFrame.p.y,Seed:NextNumber(-300,300))).p),
+				Parent = workspace
+			}
+			Meteor:SetNetworkOwner(nil)
+			MeteorScript.Parent = Meteor
+			MeteorScript.Disabled = false
+			Wait(1/2)
+		until Done
+		wait(35)
+
+	end)
+	--RainbowMeteorReady = true
+end
+
+
+function RainbowStar()
+	--if not RainbowStarReady then return end
+	--RainbowStarReady = false
+	--script:WaitForChild("Charge",10):Play()
+	if not Tool.Enabled or Tool.Grip ~= Grips.Normal or not Equipped or SecondarySpecialActive then return end
+	SecondarySpecialActive = true
+	
+	Components.StarFlames.Enabled = true
+	Components.PeriTrail.Enabled = true
+	Components.RainbowStarTrail.Enabled = true
+	Components.SuperNova.Enabled = true
+	Tool.Grip = Tool.Grip*CFrame.Angles(0,math.rad(90),0)
+		Humanoid.WalkSpeed = 250
+		Humanoid.JumpPower = 200
+	for i=1,120*3,1 do
+		if not Tool:IsDescendantOf(Character) then break end
+		Tool.Grip = Tool.Grip*CFrame.Angles(0,0,math.rad(360/5))
+		--Services.RunService.Stepped:Wait()
+		Services.RunService.Heartbeat:Wait()
+	end
+	
+	Tool.Grip = Grips.Normal
+	Components.PeriTrail.Enabled = false
+	Components.RainbowStarTrail.Enabled = false
+	Components.StarFlames.Enabled = false
+	Components.SuperNova.Enabled = false
+		Humanoid.WalkSpeed = 56
+		Humanoid.JumpPower = 90
+	--wait(0)
+	SecondarySpecialActive = false
+	--RainbowStarReady = true
+	end
+
+
+function LightBeams()
+		--if not MoltenRainbowReady then return end
+		--MoltenRainbowReady = false
+	
+	local Done = false
+	spawn(function()
+		wait(15)
+		Done = true
+	end)
+	spawn(function()
+		repeat
+			local MeteorScript = script:WaitForChild("LightBeams",10):Clone()
+			local Creator = Create("ObjectValue"){
+				Name = "Creator",
+				Value = Player,
+				Parent = MeteorScript
+			}
+
+			local Meteor = Create("Part"){
+				Shape = Enum.PartType.Cylinder,
+				Material = Enum.Material.Neon,
+				Name = "LightBeams",
+				BrickColor = BrickColor.Random(),
+				Size = Vector3.new(800,10,10),
+				CanCollide = false,
+				Anchored = false,
+				Transparency = 0.25,
+				Locked = true,
+				TopSurface = Enum.SurfaceType.Smooth,
+				BottomSurface = Enum.SurfaceType.Smooth,
+				--CFrame = CFrame.new((Root.CFrame*CFrame.new(Seed:NextNumber(-100,100),Seed:NextNumber(0,0),Seed:NextNumber(-100,100))).p,(Root.CFrame*CFrame.new(Seed:NextNumber(-100,100),Root.CFrame.p.y,Seed:NextNumber(-100,100))).p)*CFrame.Angles(0,0,math.rad(90)),
+				CFrame = CFrame.new((Root.CFrame*CFrame.new(Seed:NextNumber(-100,100),Seed:NextNumber(0,0),Seed:NextNumber(-100,100))).p)*CFrame.Angles(0,0,math.rad(90)),
+				Parent = workspace
+			}
+			local Surfaces = {"Front","Back","Left","Right","Top","Bottom"}
+			
+			local touch
+			touch = Meteor.Touched:Connect(function(hit)
+				if hit and hit.Parent and hit:IsA("BasePart") and not hit.Anchored and not hit:FindFirstAncestorWhichIsA("Accessory") and not hit:FindFirstAncestorWhichIsA("Tool") and not hit.Parent:FindFirstChildOfClass("Humanoid") and hit.Parent ~= MoltenRainbow then
+					if (hit.Size.X*hit.Size.Y*hit.Size.Z) then
+						local VaporizePart = script.LightBeams.VaporizePart:Clone()
+						VaporizePart.Parent = hit
+						VaporizePart.Disabled = false
+					end
+
+
+				end
+			end)
+
+	local PillarLighting = Create("SurfaceLight"){
+	Color = Color3.fromRGB(170, 255, 255),
+	Angle = 180,
+	Enabled = true,
+	Range = 20,
+	Shadows = false
+}
+			Meteor:SetNetworkOwner(nil)
+			MeteorScript.Parent = Meteor
+			MeteorScript.Disabled = false
+			Wait(.15)
+		until Done
+		wait(5)
+
+	end)
+	--MoltenRainbowReady = true
+end
+
+function MoltenRainbow()
+	--if not ChartreuseReady then return end
+	--ChartreuseReady = false
+	--print("Shield Pulse")
+	local MoltenRainbow = script:WaitForChild("MoltenRainbow",5):Clone()
+	MoltenRainbow.Parent = Character
+	MoltenRainbow.Disabled = false
+
+	repeat
+		Services.RunService.Heartbeat:Wait()
+	until not MoltenRainbow or not MoltenRainbow.Parent
+
+	delay((HasFullSet() and 3) or 7*2,function()
+		--ChartreuseReady = true
+	end)
+end
+
+
+Remote.OnServerEvent:Connect(function(Client,Key)
+	if not Player or not Client or Client ~= Player or not Key or not Tool.Enabled or Humanoid.Health <= 0 then return end
+	if Key == Enum.KeyCode.Q then
+		SummonRainBeam()
+		
+	elseif Key == Enum.KeyCode.F --[[and HasPeri("Rainbow")]]  then
+		RainbowNova()
+		
+	elseif Key == Enum.KeyCode.C then
+		RainbowMeteorShower()
+		RainbowComet()
+		
+	elseif Key == Enum.KeyCode.V --[[and HasPeri("Azure")]] then 
+		Rainboom()
+		RainbowDefence()
+		RainbowStar()
+		
+	elseif Key == Enum.KeyCode.G then
+		LightBeams()
+		
+	elseif Key == Enum.KeyCode.E then
+		MoltenRainbow()
+		
+	elseif Key == Enum.KeyCode.T --[[and HasPeri("Chartreuse")]] then
+		ShieldPulse()
+		
+	elseif Key == Enum.KeyCode.X --[[and HasPeri("Amethyst")]] then
+		Singularity()	
+		
+	elseif Key == Enum.KeyCode.R --[[and HasPeri("Hazel")]] then
+		RockLift()
+		
+	end
+end)

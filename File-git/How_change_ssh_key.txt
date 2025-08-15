@@ -1,0 +1,12 @@
+Lo primero que vamos ha hacer es asegurarnos de que tenemos un config en ssh (si no lo tenemos abrimos git bash en la carpeta .ssh y ponemos el comando touch config)
+despues, vamos ha hacer un  nano ~/.ssh/config y se abrira un editor de texto
+luego tendremos que poner esto y editarlo segun nuestra situación:
+
+Host github.com (esto es como queremos que se llame el repositorio que va a ser de guia de nuestra clave ssh)
+  HostName github.com (no lo toqueis, es donde queremos que se aloje la ssh)
+  User gitdavidfermeco (nuestro usuario de github, revisarlo si os da error)
+  IdentityFile /c/Users/david/.ssh/(aqui poner la ssh privada) (el directorio donde esta alojado la ssh)
+  IdentitiesOnly yes.
+
+Después hacer un Control + S para guardar y un Control + X para salir
+A continuacion tendreis que poner git remote add origin git@(nombre del host, en el caso del ejemplo github.com):(usuario de github)/(nombre de repositori en github).git, recordar meter la ssh en github, si no lo sabes copia este enlace https://github.com/settings/keys y ya esta eso es todo

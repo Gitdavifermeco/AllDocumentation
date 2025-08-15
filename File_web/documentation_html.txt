@@ -1,0 +1,51 @@
+<Html> : es para que se inicie el programa
+<head> : dentro se encuentra todo el backend (style, link, meta, etc)
+<body> : dentro se encuentra todo el frontend (img, p, div, etc)
+
+<---------------------Dentro de Head--------------------->
+<meta charset= utf-8> : es un formato de codificación de caracteres que permite que los ordenadores puedan mostrar textos en distintos idiomas (ponerlo y ya son simbolos)
+<link> : sirve para utilizar o activar otro archivo, pagina web, etc (el enlace se pone en href)
+<style> : sirve para escribir codigo css en html (no se recomienda para un codigo largo solo para cosas puntuales y ni eso)
+<script> : igual que style solo que para javascript (este si se recomienda ya que no suele haber mucho codigo js pero si hay mucho mejor hacer un link)
+<title> : sirve para dar nombre a la pagina web (si no tienes un dominio web)
+
+<---------------------Dentro de body--------------------->
+
+<-___________-Sin significado semantico-_________________>
+<div> : sirve para agrupar en bloques los elementos html
+<p> : sirve para mostrar texto en la pantalla
+<span> sirve para editar alguna palabra o frase dentro de una funcion ej: <p> Hola <span style="color= blue"> como </span> estas </p>
+<h1,2,3,4,5,6,7,8,9> : es como un p lo que pasa es que es mas ordenado, ej: h1 es el titulo, etc
+<table> : es como un html lo unico que para que se puedan poner los elementos :
+thead, tbody, tr y td (es para agrupar la informacion con un orden, como una tabla de excel)
+    <thead> : es el backend pero se escribe texto que luego se ve, es mejor verlo con un ejemplo:
+        <thead>
+            <tr>
+                <th colspan="4">Ejemplos</th> (Aqui lo que ponemos es un th que sirve para poner el titulo y para poner la variable colapsan que lo que hace es decir en cuantas
+                                                pueden ir seguidas en la misma linea, si pones 5 <td> y en el colapsan pones cuatro la 5 se pone debajo de la primera)
+            </tr>
+        </thead>
+    <tbody> : es el frontend, ejemplo
+    <tbody>
+        <tr>
+            <td>Musica</td> (<td> sirve para escribir un dato en una columna)
+            <td>Produccion</td>
+            <td>web</td>
+            <td>diseños</td>
+                        
+        </tr>
+
+    </tbody>
+    <tr> : sirve para crear una fila, un cuadrado ordenado como si fuera una tabla como un div y luego con el th y el td le das forma
+    <ul> : sirve para crear un lista desordenada
+    <ol> : sirve para crear un lista ordenada
+    <li> : sirva para escribir datos dentro de un ul o ol
+    <a> : es un boton donde tu pulsas y te lleva a algun enlace(tiene href)
+    
+
+<-___________-Con significado semantico-_________________>
+
+<nav> : es un div que sirve para decir al lector de pantalla donde esta el menú de la página web
+<section> : es un div que sirve para agrupar toda la informacion de un tema en general (luego eso se puede dividir en <article>)
+<article> : es un div que sirve para dividir conceptos (o contenidos) que pertenecen a un tema general.
+

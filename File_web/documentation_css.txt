@@ -1,0 +1,39 @@
+. {} : Afecta a todo el archivo html
+
+IMPORTANTE : todo elementos HTML (div, p, etc) se puede poner en css, me explico si quieres que todo lo que este dentro de un elemtento HTML simplemento pon el
+nombre del elemento y despues ponga {}, ej: div {}.
+Si un elemento esta dentro de una class se pondra . delante del nombre que pongamos en el class, ej: <div class="f"> para aplicarle cambios en css ponemos .f {(lo que queramos poner, un color, ect)}
+e igual si queremos en un id con la difencia de que pondremos en vez de . pondremos # (recuerda que id es solo para un elemento y class para un conjunto de los mismos)
+
+<-----------------Propiedades de Css------------>
+background-color : sirve para poner el color del fondo en el espacio del elemento al que se aplique
+color : sirve para cambiar el color de las letras del elemento donde este el texto
+text-decoration : sirve para dar las decoraciones a algunos texto pero tambien para quitarlas si vienen integradas como en <a>
+list-style : sirve para poner un numero, punto, o imagen delante de un <ul> <ol> o <li> (hay mas comandos, preguntar a chatgpt) pero tambien se pueden quitar poniendo list-style : none
+font-family : sirve para cambiar la disposicion de las letras(el tipo de letras basicamente)
+font-size : sirve para regular el tamaño de las letras
+text-align : sirve para alinear textos o imagenes de forma horizontal, si quieres vertical, mejor con display flex pero tambien aunque es un poco mas sucio con height tambien se puede
+padding : sirve para aumentar el espacio de un elemento (hay varias medidas, en px, etc)
+margin : sirve para mover un elemento en el espacio que ocupe ese elemento o si esta dentro de otro elemento en ese tambien
+width : sirve para ajustar lo que ocupa en ancho a mismas cantidad en derecha e izquierda 
+height : igual que width pero en largo en alto y bajo
+border : sirve para crear un borde.
+border-radius : sirve cara hacer mas redondas las puntas de los elementos de celda.
+float : hay dos formas ej; para que los elementos esten en linea (pondriamos siempre float: left;) 
+o si tenemos dos elemento, no queremos hacer un grid y queremos yo que se que el h1 que esta a la derecha este en la izquierda y h2 viceversa.
+display : hay varios tipos, vamos a ver unos de ellos:
+
+flex; sirve para que si se acorta la pantalla no se sobrepongan los elementos html.,
+pero tambien para que pueda ajustar la posicion de una caja, texto, y esto lo hacemos con;
+align-items (sirve para alinear un elemento de bloque como un div dentro de otro elemento de bloque como perfectamente otro div)
+o justify-content (es lo mismo lo unico que en vertical) (recuerda que sin flex no funcionan)
+
+grid : sirve para poder dividir un elemento html en diferentes celdas a tu medida, una celda puede ser de 10px y la otra de 255px 
+y grid tiene varios comandos para ajustarlo a tu medida:
+grid-template-colums; sirve para decir cuanto ancho quieres que tenga cada columna
+grid-gap : sirve para decir el espacio que hay entre cada celda
+luego hay otra que es grid-column: esta es mas compleja pero sirve para decir en que columna quieres que este un div o cualquier elemento html
+las columnas empiezan desde el primer grid que es 1/2, y el segundo 2/3 y asi sucesivamente, si no lo entiendes mirate este video https://www.youtube.com/watch?v=QBOUSrMqlSQ mas o menos por el minuto 30
+
+inline-block ; es una forma mas simple de flex sirve para alinear los objetos, puedes ¨recrear¨ el flex con height y width pero es mejor flex normalmente
+
