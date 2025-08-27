@@ -4,7 +4,7 @@ luego tendremos que poner esto y editarlo segun nuestra situación:
 
 Host github.com (esto es como queremos que se llame el repositorio que va a ser de guia de nuestra clave ssh)
   HostName github.com (no lo toqueis, es donde queremos que se aloje la ssh)
-  User gitdavidfermeco (nuestro usuario de github, revisarlo si os da error)
+  User git
   IdentityFile /c/Users/david/.ssh/(aqui poner la ssh privada) (el directorio donde esta alojado la ssh)
   IdentitiesOnly yes.
 

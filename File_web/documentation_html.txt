@@ -48,4 +48,7 @@ thead, tbody, tr y td (es para agrupar la informacion con un orden, como una tab
 <nav> : es un div que sirve para decir al lector de pantalla donde esta el menú de la página web
 <section> : es un div que sirve para agrupar toda la informacion de un tema en general (luego eso se puede dividir en <article>)
 <article> : es un div que sirve para dividir conceptos (o contenidos) que pertenecen a un tema general.
+<header>: Encabezado de la página o sección, suele incluir logo, título y navegación.
+<main>: Contenido principal único de la página, lo más importante para el usuario.
+<footer>: Pie de página o sección, con información de copyright y enlaces a políticas o datos de contacto.
 
