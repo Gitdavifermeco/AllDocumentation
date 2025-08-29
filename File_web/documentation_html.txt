@@ -52,3 +52,42 @@ thead, tbody, tr y td (es para agrupar la informacion con un orden, como una tab
 <main>: Contenido principal único de la página, lo más importante para el usuario.
 <footer>: Pie de página o sección, con información de copyright y enlaces a políticas o datos de contacto.
 
+=========================
+ESQUEMA DE FORMULARIO HTML
+=========================
+
+FORMULARIO (<form>)
+│
+├─ Atributos:
+│   ├─ action="URL"  → Define a dónde se envían los datos
+│   └─ method="GET/POST" → Define cómo se envían los datos
+│
+├─ ELEMENTOS INTERNOS
+│   │
+│   ├─ <label>
+│   │   ├─ for="id_del_input" → Vincula el label con un input específico
+│   │   └─ Texto descriptivo
+│   │
+│   ├─ <input>
+│   │   ├─ type="tipo" → Define el tipo de dato (text, email, password, number, submit...)
+│   │   ├─ id="id_del_input" → Identificador único, este tiene que ser igual al for
+│   │   └─ name="nombre_del_campo" → Nombre usado al enviar datos al servidor
+│   │
+│   └─ <button>
+│       └─ type="submit" → Envía los datos del formulario
+│
+├─ EJEMPLO COMPLETO
+│
+│ <form action="/procesar-datos" method="post">
+│   <label for="usuario">Nombre:</label>
+│   <input type="text" id="usuario" name="usuario">
+│
+│   <label for="correo">Correo:</label>
+│   <input type="email" id="correo" name="correo">
+│
+│   <button type="submit">Enviar</button>
+│ </form>
+│
+=========================
+FIN DEL ESQUEMA
+=========================
