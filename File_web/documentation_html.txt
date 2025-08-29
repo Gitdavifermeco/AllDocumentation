@@ -91,3 +91,34 @@ FORMULARIO (<form>)
 =========================
 FIN DEL ESQUEMA
 =========================
+
+===============================
+ESQUEMA DE <select> Y <option>
+===============================
+
+<select>
+│
+├─ Atributos importantes:
+│   ├─ id="pais" → identificador único (para <label> o JS)
+│   └─ name="pais" → nombre del campo enviado al servidor
+│
+├─ Contiene varias etiquetas <option>
+│   ├─ Texto visible → lo que ve el usuario
+│   └─ value → valor real que se envía al servidor
+│
+├─ Ejemplo:
+│
+│ <select id="pais" name="pais">
+│   <option value="es">España</option>
+│   <option value="mx">México</option>
+│   <option value="ar">Argentina</option>
+│ </select>
+│
+└─ Funcionamiento:
+    - Si elige España → pais=es
+    - Si elige México → pais=mx
+    - Si elige Argentina → pais=ar
+
+===============================
+FIN DEL ESQUEMA
+===============================
