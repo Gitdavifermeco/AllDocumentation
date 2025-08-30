@@ -21,7 +21,7 @@ border : sirve para crear un borde.
 border-radius : sirve cara hacer mas redondas las puntas de los elementos de celda.
 float : hay dos formas ej; para que los elementos esten en linea (pondriamos siempre float: left;) 
 o si tenemos dos elemento, no queremos hacer un grid y queremos yo que se que el h1 que esta a la derecha este en la izquierda y h2 viceversa.
-display : hay varios tipos, vamos a ver unos de ellos:
+
 
 flex; sirve para que si se acorta la pantalla no se sobrepongan los elementos html.,
 pero tambien para que pueda ajustar la posicion de una caja, texto, y esto lo hacemos con;
@@ -35,5 +35,58 @@ grid-gap : sirve para decir el espacio que hay entre cada celda
 luego hay otra que es grid-column: esta es mas compleja pero sirve para decir en que columna quieres que este un div o cualquier elemento html
 las columnas empiezan desde el primer grid que es 1/2, y el segundo 2/3 y asi sucesivamente, si no lo entiendes mirate este video https://www.youtube.com/watch?v=QBOUSrMqlSQ mas o menos por el minuto 30
 
-inline-block ; es una forma mas simple de flex sirve para alinear los objetos, puedes ¨recrear¨ el flex con height y width pero es mejor flex normalmente
+block
 
+Ocupa todo el ancho disponible.
+
+Empieza en una nueva línea.
+
+Ejemplo: <div>, <p>, <h1>...
+
+inline
+
+Solo ocupa el ancho necesario de su contenido.
+
+No inicia en una nueva línea.
+
+Ejemplo: <span>, <a>, <strong>...
+
+inline-block
+
+Se comporta como inline, pero permite aplicar propiedades de bloque (ancho, alto, márgenes).
+
+🔹 Tipos modernos y de maquetación
+
+flex
+
+Convierte el elemento en un contenedor flexible (Flexbox).
+
+Permite distribuir y alinear los elementos hijos de forma sencilla.
+
+grid
+
+Convierte el elemento en un contenedor de cuadrícula.
+
+Permite crear layouts complejos en filas y columnas.
+
+🔹 Otros valores útiles
+
+    none
+
+        El elemento no se muestra y no ocupa espacio en el flujo del documento.
+
+    inline-flex
+
+        Igual que flex, pero el contenedor se comporta como un elemento inline.
+
+    inline-grid
+
+        Igual que grid, pero en línea.
+
+    list-item
+
+        El elemento se comporta como un ítem de lista (<li>), mostrando viñetas o números.
+
+    table, inline-table, table-row, table-cell, etc.
+
+        Emulan el comportamiento de tablas HTML, útil para estructuras específicas.
