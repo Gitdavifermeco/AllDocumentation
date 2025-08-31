@@ -1,0 +1,147 @@
+🔹 let
+
+Variable que puede cambiar su valor.
+
+Solo se puede usar dentro del bloque donde se declara (por ejemplo, dentro de un if o función).
+
+🔹var
+
+lo mismo que let pero funciona en toda la funcion, osea si tu creas un let dentro de un if y luego lo necesitas fuera del if, tienes dos
+
+opciones: crear el let fuera del if y darle el valor dentro del if o en vez de let usas var
+
+🔹 const
+
+Variable constante, no se puede cambiar una vez asignada.
+
+También solo existe dentro del bloque donde se declara.
+
+es parecido a un private en java
+
+🔹 Ejemplo sencillo (para entenderlo rápido)
+
+let edad = 20 → luego puedes cambiar a 21.
+
+const pi = 3.14 → no puedes cambiar a otro valor. (bueno si puedes, si haces algo parecido a un getter y un setter en java puedes hacerlo)
+
+
+
+🔹CONSOLE.LOG(); sirve para imprimir en la pantalla
+
+Resumen completo: Cómo usar addEventListener() en JavaScript
+
+===========================================================
+
+¿Qué es addEventListener?
+-------------------------
+Es un método que permite asociar una función (manejador de eventos) a un elemento HTML para que se ejecute cuando ocurra un evento específico.
+
+Ventajas sobre onclick y atributos HTML:
+- Permite múltiples escuchadores para el mismo evento.
+- Mejor control del flujo de eventos (captura y burbuja).
+- Código más limpio y mantenible.
+
+Sintaxis Básica:
+----------------
+elemento.addEventListener(tipoDeEvento, funcionManejadora, [opciones]);
+
+Parámetros:
+-----------
+1. tipoDeEvento (String): El nombre del evento a escuchar.
+   Ejemplos: 'click', 'mouseover', 'keydown', 'submit'
+
+2. funcionManejadora (Function): La función que se ejecuta cuando ocurre el evento.
+   Puede ser una función anónima o una función nombrada.
+
+3. opciones (Object - Opcional): Un objeto con configuración.
+   - capture: Boolean (fase del evento)
+   - once: Boolean (si se ejecuta solo una vez)
+   - passive: Boolean (para eventos de scroll/touch, mejora rendimiento)
+
+Uso de "useCapture" (alternativa legada):
+elemento.addEventListener(evento, funcion, useCapture);
+- useCapture = true: Fase de captura
+- useCapture = false (default): Fase de burbuja
+
+Métodos Comunes para Obtener Elementos:
+---------------------------------------
+- document.getElementById('id')
+- document.querySelector('.clase')
+- document.querySelectorAll('div')[0]
+
+Eventos Comunes:
+----------------
+- Mouse: click, dblclick, mouseenter, mouseleave, mousemove
+- Teclado: keydown, keyup, keypress
+- Formularios: submit, change, focus, blur
+- Ventana: load, resize, scroll
+
+Ejemplos Prácticos:
+-------------------
+
+1. Evento de Click básico:
+const boton = document.getElementById('miBoton');
+boton.addEventListener('click', function() {
+    alert('Botón clickeado!');
+});
+
+2. Con función externa:
+function manejarClick() {
+    console.log('Click manejado');
+}
+boton.addEventListener('click', manejarClick);
+
+3. Con parámetros (usando función anónima):
+boton.addEventListener('click', function() {
+    miFuncionConParametros(param1, param2);
+});
+
+4. Evento con objeto Event:
+boton.addEventListener('click', function(evento) {
+    console.log(evento.target); // Elemento que disparó el evento
+    evento.preventDefault(); // Prevenir comportamiento por defecto
+});
+
+5. Opción once (se ejecuta una sola vez):
+boton.addEventListener('click', function() {
+    console.log('Solo se ejecuta una vez');
+}, { once: true });
+
+6. Múltiples eventos en un elemento:
+boton.addEventListener('mouseover', function() {
+    this.style.backgroundColor = 'blue';
+});
+boton.addEventListener('mouseout', function() {
+    this.style.backgroundColor = '';
+});
+
+Remover Event Listeners:
+------------------------
+Para remover un event listener, debe usarse una función nombrada:
+const miFuncion = function() { ... };
+elemento.addEventListener('click', miFuncion);
+elemento.removeEventListener('click', miFuncion);
+
+Consideraciones de "this":
+---------------------------
+En un event listener, "this" hace referencia al elemento que disparó el evento, a menos que se use una arrow function.
+
+Buenas Prácticas:
+-----------------
+1. Usar funciones nombradas cuando necesites remover el listener.
+2. Preferir addEventListener sobre onclick en el HTML.
+3. Considerar event delegation para elementos dinámicos.
+4. Remover listeners cuando ya no sean necesarios para evitar memory leaks.
+
+Event Delegation:
+-----------------
+En lugar de agregar listeners a muchos elementos, agregar uno al padre:
+document.getElementById('lista').addEventListener('click', function(e) {
+    if (e.target.tagName === 'LI') {
+        console.log('Elemento de lista clickeado:', e.target);
+    }
+});
+
+Soporte Navegadores:
+--------------------
+addEventListener es compatible con todos los navegadores modernos e IE9+.
