@@ -145,3 +145,217 @@ document.getElementById('lista').addEventListener('click', function(e) {
 Soporte Navegadores:
 --------------------
 addEventListener es compatible con todos los navegadores modernos e IE9+.
+
+RESUMEN COMPLETO DE DOCUMENT EN JAVASCRIPT
+==========================================
+
+¿QUÉ ES EL DOCUMENT OBJECT MODEL (DOM)?
+----------------------------------------
+El Document en JavaScript es una representación estructurada en forma de árbol 
+de un documento HTML. Es la interfaz principal para trabajar con el contenido 
+de una página web.
+
+ACCESO AL OBJETO DOCUMENT
+-------------------------
+// En navegadores, document está disponible globalmente
+console.log(document);
+
+// También se puede acceder a través de window
+console.log(window.document);
+
+MÉTODOS PRINCIPALES PARA SELECCIONAR ELEMENTOS
+----------------------------------------------
+
+1. Selección por ID
+const elemento = document.getElementById('miId');
+
+2. Selección por clase
+const elementos = document.getElementsByClassName('miClase');
+// Retorna una HTMLCollection
+
+3. Selección por etiqueta
+const elementos = document.getElementsByTagName('div');
+// Retorna una HTMLCollection
+
+4. Selección por selector CSS (moderno)
+// Selecciona el primer elemento que coincida
+const elemento = document.querySelector('.miClase');
+
+// Selecciona todos los elementos que coincidan
+const elementos = document.querySelectorAll('div.miClase');
+// Retorna una NodeList
+
+CREACIÓN DE ELEMENTOS
+---------------------
+// Crear nuevo elemento
+const nuevoDiv = document.createElement('div');
+
+// Crear nodo de texto
+const texto = document.createTextNode('Hola Mundo');
+
+// Añadir texto al elemento
+nuevoDiv.textContent = 'Texto del div';
+nuevoDiv.innerHTML = '<strong>Texto</strong> con HTML';
+
+MODIFICACIÓN DEL DOM
+--------------------
+// Modificar valores
+ const NumeroRandom = 1;
+ console.log(NumeroRandom) // imprime 1
+ NumeroRandom.value=2
+ console.log(NumeroRandom) // imprime 2
+Añadir elementos:
+// Añadir al final
+document.body.appendChild(nuevoDiv);
+
+// Añadir en posición específica
+const padre = document.getElementById('padre');
+const referencia = document.getElementById('referencia');
+padre.insertBefore(nuevoDiv, referencia);
+
+// Métodos modernos
+padre.append(nuevoDiv); // Al final
+padre.prepend(nuevoDiv); // Al inicio
+
+Eliminar elementos:
+const elemento = document.getElementById('eliminar');
+elemento.remove();
+
+// Método antiguo
+elemento.parentNode.removeChild(elemento);
+
+Reemplazar elementos:
+const viejoElemento = document.getElementById('viejo');
+const nuevoElemento = document.createElement('div');
+viejoElemento.parentNode.replaceChild(nuevoElemento, viejoElemento);
+
+MANIPULACIÓN DE ATRIBUTOS Y CLASES
+----------------------------------
+
+Atributos:
+const elemento = document.getElementById('miElemento');
+
+// Obtener atributo
+const valor = elemento.getAttribute('data-info');
+
+// Establecer atributo
+elemento.setAttribute('data-info', 'nuevo valor');
+
+// Verificar atributo
+if (elemento.hasAttribute('data-info')) {
+    // Eliminar atributo
+    elemento.removeAttribute('data-info');
+}
+
+Clases:
+const elemento = document.getElementById('miElemento');
+
+// Añadir clase
+elemento.classList.add('nueva-clase');
+
+// Eliminar clase
+elemento.classList.remove('clase-vieja');
+
+// Alternar clase
+elemento.classList.toggle('activa');
+
+// Verificar clase
+if (elemento.classList.contains('activa')) {
+    // Hacer algo
+}
+
+EVENTOS
+-------
+
+Añadir event listeners:
+const boton = document.getElementById('miBoton');
+
+// Método recomendado
+boton.addEventListener('click', function(event) {
+    console.log('Botón clickeado', event);
+});
+
+// Método antiguo (no recomendado)
+boton.onclick = function() {
+    console.log('Click antiguo');
+};
+
+Remover event listeners:
+function manejarClick() {
+    console.log('Click');
+}
+
+boton.addEventListener('click', manejarClick);
+// Para remover luego
+boton.removeEventListener('click', manejarClick);
+
+PROPIEDADES IMPORTANTES DEL DOCUMENT
+------------------------------------
+- document.head: Accede al elemento <head>
+- document.body: Accede al elemento <body>
+- document.title: Obtiene o establece el título del documento
+- document.URL: Retorna la URL completa del documento
+- document.forms: Colección de todos los formularios
+- document.images: Colección de todas las imágenes
+- document.links: Colección de todos los enlaces
+
+MÉTODOS ADICIONALES ÚTILES
+--------------------------
+// Crear un fragmento de documento (mejor performance)
+const fragmento = document.createDocumentFragment();
+
+// Clonar un elemento
+const elementoOriginal = document.getElementById('original');
+const clon = elementoOriginal.cloneNode(true);
+
+// Verificar si un elemento contiene a otro
+const contenedor = document.getElementById('contenedor');
+const hijo = document.getElementById('hijo');
+const contiene = contenedor.contains(hijo);
+
+BUENAS PRÁCTICAS
+----------------
+1. Usar querySelector y querySelectorAll para selecciones complejas
+2. Utilizar classList en lugar de className para manipular clases
+3. Preferir addEventListener sobre onclick y similares
+4. Usar createDocumentFragment para múltiples inserciones
+5. Validar que los elementos existen antes de manipularlos
+
+NOTAS IMPORTANTES
+-----------------
+- HTMLCollection y NodeList son colecciones similares a arrays pero no arrays
+- Los métodos getElementsBy* retornan colecciones vivas
+- querySelectorAll retorna una NodeList estática
+- Siempre verificar null/undefined al seleccionar elementos
+
+
+Node Type ; Sirven para comprobar de manera simplificada que tipo de nodo estas utilizando
+    
+   ejemplo:  let elementos = document.body.childNodes;
+    elementos.forEach(nodo => {
+    if (nodo.nodeType === 1) { // 1 = Elemento
+        console.log(nodo.tagName);
+    }
+    });
+
+    lista de tipos ;
+
+    nodeType	Tipo de nodo	        Descripción
+1	Elemento (Element)	                Un elemento HTML o XML, como <div> o <p>
+2	Atributo (Attr)	                    Un atributo de un elemento, como id="miDiv"
+3	Nodo de texto (Text)	            El contenido de texto dentro de un elemento
+4	CDATA (CDATASection)	            Sección CDATA en XML (no usado en HTML)
+5	Entidad general (EntityReference)	Referencia a una entidad (XML)
+6	Entidad (Entity)	                Nodo de entidad definido en DTD (XML)
+
+7	Procesamiento de instrucción        Instrucciones de procesamiento en XML,
+    (ProcessingInstruction)             como <?xml-stylesheet ... ?>	                 
+     
+8	Comentario (Comment)	            Comentario <!-- ... -->
+9	Documento (Document)	            El objeto document completo
+10	Documento tipo (DocumentType)	    Definición de tipo de documento (DTD)
+
+11	Fragmento de documento              Fragmento de DOM que no está en el documento principal
+     (DocumentFragment)	
+
+12	Notación (Notation)	                   Nodo de notación XML (definido en DTD)
